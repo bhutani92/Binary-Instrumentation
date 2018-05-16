@@ -92,6 +92,8 @@ gcc -o loadRSP loadRSP.c
 pin -t obj-intel64/stackPivoting.so -- ./loadRSP
 
 
-Shadow Stack
-
-TO-DO
+The following files have been copied from PIN_ROOT directory. Only all: and clean: has been commented out to ensure my custom makefile will be used when running make all and make clean.
+1. makefile.default.rules
+2. makefile.config
+3. makefile.rules
+4. makefile
