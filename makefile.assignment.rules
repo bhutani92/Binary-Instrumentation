@@ -1,0 +1,23 @@
+CC = g++
+
+helloWorld : 	helloWorld.cpp
+		$(CC) -o helloWorld helloWorld.cpp
+
+recurSum : 	recurSum.cpp
+		$(CC) -o recurSum recurSum.cpp
+
+mallocTest : 	mallocTest.cpp
+		$(CC) -o mallocTest mallocTest.cpp
+
+loadRSP :	loadRSP.cpp
+		$(CC) -o loadRSP loadRSP.cpp
+
+all : helloWorld recurSum mallocTest loadRSP obj-intel64/countBBL.so obj-intel64/wrapMalloc.so obj-intel64/cftCount.so obj-intel64/stackAnalyzer.so obj-intel64/stackPivoting.so 
+
+clean :	
+		\rm -rf helloWorld recurSum mallocTest loadRSP *.out* obj-intel64/* *.log.* *.tar.gz
+
+tar :
+		tar zcvf 110898687.tar.gz *
+
+.PHONY : all

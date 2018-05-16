@@ -1,0 +1,97 @@
+AUTHOR - AKHIL BHUTANI
+ID - 110898687
+
+BINARY INSTRUMENTATION
+
+The Warmup and the main project are based on use of Intel's PIN tool for Binary Instrumentation. The PIN_ROOT must be defined with the directory of the pin tool.
+
+**IMPORTANT**
+export PIN_ROOT="$HOME/pin-3.6-97554-g31f0a167d-gcc-linux", or any directory where you want
+
+Location
+
+The PIN tool is currently located in $HOME/pin-3.6-97554-g31f0a167d-gcc-linux.
+
+
+Operating System Specification
+
+Ubuntu 17.10 artful
+
+
+Version
+
+pin-3.6-97554-31f0a167d
+
+
+SUPPORTED APPLICATIONS
+
+Applications listed along with examples
+/bin/ls
+gedit
+Opera
+Unfortunately, firefox and other browsers is not supported currently as pin instrumentation doesn't allow support for web browsers instrumentation. Their ManualExamples are also not able to instrument firefox and other web browsers. This implies there might be some issue with how web browsers allocate the threads and it may not be compatible with PIN instrumentation and may be causing deadlocks. Only Opera is producing the output as desired. Currently, other applications have not been tried.
+
+Required information has been printed on stdout along with files with <program_name>.out as the file name. Some applications pipe the stdout and hence, some information sent to stdout might not be visible as in case of /bin/ls. Refer to the file for the associated count.
+
+
+MAKE COMMANDS
+
+Make all will make all the pin tools and test program. The following commands that will come in handy are as below :
+
+make clean
+make all
+pin -t obj-intel64/countBBL.so -- ./helloWorld
+pin -t obj-intel64/wrapMalloc.so -- ./mallocTest
+pin -t obj-intel64/cftCount.so -- ./recurSum
+pin -t obj-intel64/stackAnalyzer.so -- ./helloWorld
+pin -t obj-intel64/stackPivoting.so -- ./loadRSP
+
+
+Count Basic Blocks
+
+Trace is used to count the number of Basic Blocks. Trace is a sequence of instructions that is always entered at the top and may have multiple exits. All the basic blocks (BBL) are traversed in the trace and count is updated using a inline callback function. The count is displayed using fini function.
+
+make obj-intel64/countBBL.so
+gcc -o helloWorld helloWorld.cpp
+pin -t obj-intel64/countBBL.so -- ./helloWorld
+
+
+Wrapping Calls to Malloc
+
+The image is loaded and routine is replaced if the IMG name matches the associated parameters. We usually look for libc for Malloc calls and hence, libc.so is matched. Once the routine is found, it is replaced in JIT mode with our definition for Malloc to wrap the calls. In our custom malloc definition, the number of calls and total size is recorded and displayed using Fini function.
+
+make obj-intel64/wrapMalloc.so
+gcc -o mallocTest mallocTest.cpp
+pin -t obj-intel64/wrapMalloc.so -- ./mallocTest
+
+
+Count Control Flow Transfers
+
+The instrumentation is performed at instruction granularity where a particular instruction is checked if it is direct branch or call or is indirect branch or call and the counts are recorded. The counts are displayed using Fini function.
+
+make obj-intel64/cftCount.so
+gcc -o recurSum recurSum.cpp
+pin -t obj-intel64/cftCount.so -- ./recurSum
+
+
+Stack Use Analyzer
+
+The image is loaded and all sections, routines and instructions are analysed via loops. For every image, the maxRSP is initialized to 0x0 and minRSP is initialized to ~0x0. Various callbacks are placed Before and After instructions to measure the minimum and maximum RSP. The values are displayed using Fini function.
+
+make obj-intel64/stackAnalyzer.so
+gcc -o helloWorld helloWorld.cpp
+pin -t obj-intel64/stackAnalyzer.so -- ./helloWorld
+
+
+Stack Pivoting
+
+The image is loaded and all sections, routines and instructions are analyzed via loops. For every image maxRSP is initialzed to 0x0 so that only the program image is considered as maxRSP would not be initialized for binaries. If the instruction disassembly involves RSP and RBP, callbacks are placed Before and After the instruction. The Before callback is used to update the maxRSP so that we only analyze our program image and also updates the oldRSP value using the context parameters. The After callback gets the current value of RSP register and compares with the oldRSP value. If current RSP values lies between oldRSP and maxRSP, it is assumed that the stack contents are intact, whereas if the above condition doesn't hold, we can safely state that someone is trying to mess up the stack in an unwanted manner.
+
+make obj-intel64/stackPivoting.so
+gcc -o loadRSP loadRSP.c
+pin -t obj-intel64/stackPivoting.so -- ./loadRSP
+
+
+Shadow Stack
+
+TO-DO
